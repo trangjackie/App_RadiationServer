@@ -1,0 +1,26 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:telerikDataViz="using:Telerik.UI.Xaml.Controls.DataVisualization"
+    xmlns:local="using:App_RadiationServer">
+
+    <telerikDataViz:RadLinearGauge telerikDataViz:RadLinearGauge.Orientation="Vertical" MinValue="0" MaxValue="70" LabelStep="10" TickStep="10" LabelOffset="-20">
+        <telerikDataViz:RadLinearGauge.TickTemplate>
+            <DataTemplate>
+                <Rectangle Width="1" Height="5" Fill="#999999" Margin="0 0 0 3"></Rectangle>
+            </DataTemplate>
+        </telerikDataViz:RadLinearGauge.TickTemplate>
+        <telerikDataViz:SegmentedLinearGaugeIndicator Value="70" telerikDataViz:RadLinearGauge.Orientation="Vertical">
+            <telerikDataViz:BarIndicatorSegment Length="10" Stroke="#999999" Thickness="2" telerikDataViz:RadLinearGauge.Orientation="Vertical"/>
+            <telerikDataViz:BarIndicatorSegment Length="30" Stroke=" #4d4d4d" Thickness="2" telerikDataViz:RadLinearGauge.Orientation="Vertical"/>
+            <telerikDataViz:BarIndicatorSegment Length="30" Stroke="Red" Thickness="2" telerikDataViz:RadLinearGauge.Orientation="Vertical"/>
+        </telerikDataViz:SegmentedLinearGaugeIndicator>
+        <telerikDataViz:MarkerGaugeIndicator  telerikDataViz:RadLinearGauge.Orientation="Vertical" Value="0">
+            <telerikDataViz:MarkerGaugeIndicator.Content>
+                <Rectangle Width="7" Height="2" Fill="#999999" Margin="0 0 5 0" />
+            </telerikDataViz:MarkerGaugeIndicator.Content>
+        </telerikDataViz:MarkerGaugeIndicator>
+        <telerikDataViz:LinearBarGaugeIndicator telerikDataViz:RadLinearGauge.Orientation="Vertical" Brush="#FF696969" Thickness="20" IsAnimated="True"  telerikDataViz:RadLinearGauge.IndicatorOffset="15" />
+    </telerikDataViz:RadLinearGauge>
+    
+</ResourceDictionary>

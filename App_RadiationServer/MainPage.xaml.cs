@@ -22,9 +22,24 @@ namespace App_RadiationServer
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public EmulatedData mydata;
         public MainPage()
         {
+            this.Loaded += this.OnLoaded;
+            this.Unloaded += this.OnUnloaded;
+
+            this.mydata = new EmulatedData();
             this.InitializeComponent();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            this.mydata.StartTimer();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            this.mydata.StopTimer();
         }
     }
 }
