@@ -13,12 +13,12 @@ namespace App_RadiationServer
     {
         private DispatcherTimer timer;
         private Random r;
-
+        
         public EmulatedData()
         {
             r = new Random();
             timer = new DispatcherTimer() { Interval = new TimeSpan(0, 0, 1) };
-            timer.Tick += timer_Tick;
+            timer.Tick += Timer_Tick;
             this.LoadData();
         }
 
@@ -57,7 +57,6 @@ namespace App_RadiationServer
         }
 
         private double rs_humidity;
-
         public double RSHumidity
         {
             get { return rs_humidity; }
@@ -68,6 +67,38 @@ namespace App_RadiationServer
             }
         }
 
+        private double rs_autonomy;
+        public double RSAutonomy
+        {
+            get { return rs_autonomy; }
+            set
+            {
+                rs_autonomy = value;
+                this.OnPropertyChanged("RSAutonomy");
+            }
+        }
+        // Tham số liên quan đến gió
+        private WindData rs_wind;
+        public WindData RSWind
+        {
+            get { return rs_wind; }
+            set
+            {
+                rs_wind = value;
+                this.OnPropertyChanged("RSWind");
+            }
+        }
+        private List<string> strHuong = new List<string>() { "Dong", "Tay", "Nam", "Bac" };
+        public List<string> StrHuong
+        {
+            get { return strHuong; }
+            private set
+            {
+                strHuong = value;
+                this.OnPropertyChanged("StrHuong");
+            }
+        }
+        // store data line 1
         private CallsData currentActiveCalls;
 
         public CallsData CurrentActiveCalls
@@ -91,14 +122,49 @@ namespace App_RadiationServer
             }
         }
 
+        // store data line 2
+        private CallsData currentActiveCalls2;
 
-        void timer_Tick(object sender, object e)
+        public CallsData CurrentActiveCalls2
+        {
+            get { return currentActiveCalls2; }
+            set
+            {
+                currentActiveCalls2 = value;
+                this.OnPropertyChanged("CurrentActiveCalls2");
+            }
+        }
+        private ObservableCollection<CallsData> callHistory2;
+
+        public ObservableCollection<CallsData> CallHistory2
+        {
+            get { return callHistory2; }
+            private set
+            {
+                callHistory2 = value;
+                this.OnPropertyChanged("CallHistory2");
+            }
+        }
+
+        void Timer_Tick(object sender, object e)
         {
             this.UpdateIndicators();
             var lastRecorderData = this.CallHistory.Last();
-            this.CurrentActiveCalls = new CallsData { Date = lastRecorderData.Date.AddMilliseconds(500), ActiveCalls = r.Next(10, 30) };
+            this.CurrentActiveCalls = new CallsData {
+                Date = lastRecorderData.Date.AddMilliseconds(1000),
+                ActiveCalls = r.Next(10, 30)
+            };
             this.CallHistory.Add(CurrentActiveCalls);
             this.CallHistory.RemoveAt(0);
+
+            var lastRecorderData2 = this.CallHistory2.Last();
+            this.CurrentActiveCalls2 = new CallsData
+            {
+                Date = lastRecorderData2.Date.AddMilliseconds(1000),
+                ActiveCalls = r.Next(30, 50)
+            };
+            this.CallHistory2.Add(CurrentActiveCalls2);
+            this.CallHistory2.RemoveAt(0);
         }
 
         private void LoadData()
@@ -106,9 +172,19 @@ namespace App_RadiationServer
             UpdateIndicators();
             var now = DateTime.Now;
             var historyData = from c in Enumerable.Range(0, 24)
-                              select new CallsData { ActiveCalls = r.Next(10, 30), Date = now.AddMilliseconds(-500 * c) };
-
+                select new CallsData
+                {
+                    ActiveCalls = r.Next(10, 30),
+                    Date = now.AddMilliseconds(-1000 * c)
+                };
             this.CallHistory = new ObservableCollection<CallsData>(historyData.OrderBy(c => c.Date));
+            var historyData2 = from c in Enumerable.Range(0, 24)
+                select new CallsData
+                {
+                    ActiveCalls = r.Next(30, 50),
+                    Date = now.AddMilliseconds(-1000 * c)
+                };
+            this.CallHistory2 = new ObservableCollection<CallsData>(historyData2.OrderBy(c => c.Date));
         }
 
         private void UpdateIndicators()
@@ -116,26 +192,20 @@ namespace App_RadiationServer
             this.RSTemperature = r.Next(0, 70);
             this.RSSmoke = r.Next(0, 30);
             this.RSHumidity = r.Next(0, 100);
+            this.RSAutonomy = r.Next(0, 100);
+            this.RSWind = new WindData
+            {
+                TocdoGio = r.Next(0, 200),
+                HuongGio = r.Next(0, 360)
+            };
         }
     }
 
-    public class CoerceValueConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            return Math.Min((double)value, double.Parse((string)parameter));
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    
 
     public class CallsData : ViewModelBase
     {
         private int activeCalls;
-
         public int ActiveCalls
         {
             get { return activeCalls; }
@@ -145,7 +215,6 @@ namespace App_RadiationServer
                 this.OnPropertyChanged("ActiveCalls");
             }
         }
-
 
         private DateTime date;
 
@@ -157,6 +226,48 @@ namespace App_RadiationServer
                 date = value;
                 this.OnPropertyChanged("Date");
             }
+        }
+    }
+
+    public class WindData: ViewModelBase
+    {
+        private int huongGio;
+        public int HuongGio
+        {
+            get { return huongGio; }
+            set
+            {
+                huongGio = value;
+                this.OnPropertyChanged("HuongGio");
+            }
+        }
+        private float tocdoGio;
+        public float TocdoGio
+        {
+            get { return tocdoGio; }
+            set
+            {
+                tocdoGio = value;
+                this.OnPropertyChanged("TocdoGio");
+            }
+        }
+    }
+
+    public class StringFormatConverter : IValueConverter
+    {
+        public string StringFormat { get; set; }
+
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (!String.IsNullOrEmpty(StringFormat))
+                return String.Format(StringFormat, value);
+
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
         }
     }
 }

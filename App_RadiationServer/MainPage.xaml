@@ -9,7 +9,11 @@
     x:Class="App_RadiationServer.MainPage"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    
+    <Page.Resources>
+        <local:StringFormatConverter x:Key="PercentageStringFormatConverter" StringFormat="Value: {0:P2}"/>
+        <local:StringFormatConverter x:Key="DateStringFormatConverter" StringFormat="Date: {0:dddd yyyy-MM-dd}"/>
+        <local:StringFormatConverter x:Key="WindSpeedStringFormatConverter" StringFormat="{}{0}m/s"/>
+    </Page.Resources>
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <!-- 2 cột 2 máy-->
@@ -24,16 +28,229 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+                    <!--Máy 1: Nhãn-->
                     <Grid Grid.Row="0">
                         <TextBlock Text="BOUY 1" Margin="0 0 0 10" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"  FontWeight="ExtraBold"/>
                     </Grid>
+                    <!--Máy 1: Cột hiện sóng và Cột tham số-->
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
+                        <!--Máy 1: Cột hiển thị sóng-->
                         <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="4*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="4*"/>
+                                <RowDefinition Height="1*" />
+                            </Grid.RowDefinitions>
+                            <!--Máy 1: Cột hiện sóng: Sóng trên-->
+                            <Grid Grid.Row="0">
+                                <telerikChart:RadCartesianChart Margin="0 4 0 0" VerticalAlignment="Stretch">
+                                    <telerikChart:RadCartesianChart.Grid>
+                                        <telerikChart:CartesianChartGrid MajorLinesVisibility="XY"/>
+                                    </telerikChart:RadCartesianChart.Grid>
+                                    <telerikChart:RadCartesianChart.VerticalAxis>
+                                        <telerikChart:LinearAxis MajorStep="10" Maximum="80" Minimum="0">
+                                            <telerikChart:LinearAxis.LineStyle>
+                                                <Style TargetType="Line">
+                                                    <Setter Property="Stroke" Value="Cyan"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LineStyle>
+                                            <telerikChart:LinearAxis.LabelStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Cyan"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LabelStyle>
+                                            <telerikChart:LinearAxis.MajorTickStyle>
+                                                <Style TargetType="Rectangle">
+                                                    <Setter Property="Stroke" Value="Cyan"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.MajorTickStyle>
+                                        </telerikChart:LinearAxis>
+                                    </telerikChart:RadCartesianChart.VerticalAxis>
+                                    <telerikChart:RadCartesianChart.HorizontalAxis>
+                                        <telerikChart:DateTimeContinuousAxis x:Name="horizontalAxis_b1_w1" LabelFormat="{} {0,0:hh:MM:ss}" MajorStepUnit="Second" MajorStep="10" />
+                                    </telerikChart:RadCartesianChart.HorizontalAxis>
+                                    <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory, Mode=OneWay}" CombineMode="Stack" Stroke="Aqua">
+                                        <telerikChart:LineSeries.ValueBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
+                                        </telerikChart:LineSeries.ValueBinding>
+                                        <telerikChart:LineSeries.CategoryBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="Date"/>
+                                        </telerikChart:LineSeries.CategoryBinding>
+                                    </telerikChart:LineSeries>
+                                    <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory2, Mode=OneWay}" 
+                                                         CombineMode="Stack"
+                                                         Stroke="Red">
+                                        <telerikChart:LineSeries.VerticalAxis>
+                                            <telerikChart:LinearAxis HorizontalLocation="Right" MajorStep="20" Maximum="100" Minimum="0" >
+                                                <telerikChart:LinearAxis.LineStyle>
+                                                    <Style TargetType="Line">
+                                                        <Setter Property="Stroke" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.LineStyle>
+                                                <telerikChart:LinearAxis.LabelStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.LabelStyle>
+                                                <telerikChart:LinearAxis.MajorTickStyle>
+                                                    <Style TargetType="Rectangle">
+                                                        <Setter Property="Stroke" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.MajorTickStyle>
+                                            </telerikChart:LinearAxis>
+                                        </telerikChart:LineSeries.VerticalAxis>
+                                        <telerikChart:LineSeries.ValueBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
+                                        </telerikChart:LineSeries.ValueBinding>
+                                        <telerikChart:LineSeries.CategoryBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="Date"/>
+                                        </telerikChart:LineSeries.CategoryBinding>
+                                    </telerikChart:LineSeries>
+                                </telerikChart:RadCartesianChart>
 
+                            </Grid>
+                            <!--Máy 1: Các tham số hiện tại: Cs137, Cs134, I131-->
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <!-- Hiển thị Cs137-->
+                                <Grid Grid.Column="0" Background="#028CFD" Margin="0,0,7,0" Width="98" >
+                                    <TextBlock Text="{x:Bind mydata.CurrentActiveCalls.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Yellow"
+                                       Margin="0,15,10,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                    <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Yellow"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>Cs</Run>
+                                    <Run Typography.Variants="Superscript">137</Run>
+                                    </TextBlock>
+                                </Grid>
+                                <!-- Hiển thị Cs134-->
+                                <Grid Grid.Column="1" Background="#028CFD" Margin="7,0,0,0" Width="98">
+                                    <TextBlock Text="{x:Bind mydata.CurrentActiveCalls2.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Orange"
+                                       Margin="0,15,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                                    <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Orange"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>Cs</Run>
+                                    <Run Typography.Variants="Superscript">134</Run>
+                                    </TextBlock>
+                                </Grid>
+                                <!-- Hiển thị I131-->
+                                <Grid Grid.Column="2" Background="#028CFD" Margin="7,0,0,0" Width="98">
+                                    <TextBlock Text="{x:Bind mydata.CurrentActiveCalls2.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="White"
+                                       Margin="0,15,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                                    <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="White"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>I</Run>
+                                    <Run Typography.Variants="Superscript">131</Run>
+                                    </TextBlock>
+                                </Grid>
+                            </Grid>
+                            <!--Máy 1: Cột hiện sóng: Sóng dưới-->
+                            <Grid Grid.Row="2">
+                                <telerikChart:RadCartesianChart Margin="0 4 0 0" VerticalAlignment="Stretch">
+                                    <telerikChart:RadCartesianChart.Grid>
+                                        <telerikChart:CartesianChartGrid MajorLinesVisibility="XY"/>
+                                    </telerikChart:RadCartesianChart.Grid>
+                                    <telerikChart:RadCartesianChart.VerticalAxis>
+                                        <telerikChart:LinearAxis  MajorStep="10" Maximum="80" Minimum="0" >
+                                            <telerikChart:LinearAxis.LineStyle>
+                                                <Style TargetType="Line">
+                                                    <Setter Property="Stroke" Value="Blue"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LineStyle>
+                                            <telerikChart:LinearAxis.LabelStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Blue"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LabelStyle>
+                                            <telerikChart:LinearAxis.MajorTickStyle>
+                                                <Style TargetType="Rectangle">
+                                                    <Setter Property="Stroke" Value="Blue"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.MajorTickStyle>
+                                        </telerikChart:LinearAxis>
+                                    </telerikChart:RadCartesianChart.VerticalAxis>
+                                    <telerikChart:RadCartesianChart.HorizontalAxis>
+                                        <telerikChart:DateTimeContinuousAxis x:Name="horizontalAxis_b1_w2" LabelFormat="{} {0,0:hh:MM:ss}" MajorStepUnit="Second" MajorStep="4" />
+                                    </telerikChart:RadCartesianChart.HorizontalAxis>
+                                    <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory, Mode=OneWay}" 
+                                                             CombineMode="Stack" 
+                                                             Stroke="Blue">
+                                        <telerikChart:LineSeries.ValueBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
+                                        </telerikChart:LineSeries.ValueBinding>
+                                        <telerikChart:LineSeries.CategoryBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="Date"/>
+                                        </telerikChart:LineSeries.CategoryBinding>
+                                    </telerikChart:LineSeries>
+                                    <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory2, Mode=OneWay}" 
+                                                         CombineMode="Stack"
+                                                         Stroke="Red" >
+                                        <telerikChart:LineSeries.VerticalAxis>
+                                            <telerikChart:LinearAxis HorizontalLocation="Right" MajorStep="20" Maximum="100" Minimum="0" >
+                                                <telerikChart:LinearAxis.LineStyle>
+                                                    <Style TargetType="Line">
+                                                        <Setter Property="Stroke" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.LineStyle>
+                                                <telerikChart:LinearAxis.LabelStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.LabelStyle>
+                                                <telerikChart:LinearAxis.MajorTickStyle>
+                                                    <Style TargetType="Rectangle">
+                                                        <Setter Property="Stroke" Value="Red"></Setter>
+                                                    </Style>
+                                                </telerikChart:LinearAxis.MajorTickStyle>
+                                            </telerikChart:LinearAxis>
+                                        </telerikChart:LineSeries.VerticalAxis>
+                                        <telerikChart:LineSeries.ValueBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
+                                        </telerikChart:LineSeries.ValueBinding>
+                                        <telerikChart:LineSeries.CategoryBinding>
+                                            <telerikChart:PropertyNameDataPointBinding PropertyName="Date"/>
+                                        </telerikChart:LineSeries.CategoryBinding>
+                                    </telerikChart:LineSeries>
+                                </telerikChart:RadCartesianChart>
+                            </Grid>
+                            <!--Máy 1: Các tham số T, C-->
+                            <Grid Grid.Row="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <!-- Hiển thị T-->
+                                <Grid Grid.Column="0" Background="#028CFD" Margin="0,0,7,0" Width="98" >
+                                    <TextBlock Text="{x:Bind mydata.CurrentActiveCalls.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Red"
+                                       Margin="0,15,10,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                    <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Red"
+                                       Margin="0,60,10,0" HorizontalAlignment="Center" VerticalAlignment="Top" >
+                                    <Run>T</Run>
+                                    </TextBlock>
+                                </Grid>
+                                <!-- Hiển thị C-->
+                                <Grid Grid.Column="1" Background="#028CFD" Margin="7,0,0,0" Width="98">
+                                    <TextBlock Text="{x:Bind mydata.CurrentActiveCalls2.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Cyan"
+                                       Margin="0,15,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                                    <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Cyan"
+                                       Margin="0,60,10,0" HorizontalAlignment="Center" VerticalAlignment="Top" >
+                                    <Run>C</Run>
+                                    </TextBlock>
+                                </Grid>
+                                <!-- Nút play back-->
+                                <Grid Grid.Column="2">
+                                </Grid>
+                            </Grid>
                         </Grid>
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
@@ -41,8 +258,61 @@
                                 <RowDefinition Height="1*" />
                                 <RowDefinition Height="1*" />
                             </Grid.RowDefinitions>
+                            <!--Hiển thị la bàn-->
                             <Grid Grid.Row="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="10*" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <TextBlock Text="Bắc" Margin="0 10 10 0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"  FontWeight="Bold"/>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0">
+                                        <TextBlock Text="Tây" Margin="20 0 0 -30" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"  FontWeight="Bold" >
+                                            <TextBlock.RenderTransform>
+                                                    <RotateTransform Angle="270" />
+                                            </TextBlock.RenderTransform>  
+                                        </TextBlock>
+                                    </Grid>
+                                    <Grid Grid.Column="1">
+                                        <VariableSizedWrapGrid Orientation="Horizontal" Margin="-20 0 0 0" MaximumRowsOrColumns="2" ItemHeight="200" ItemWidth="200" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <telerikDataViz:RadRadialGauge MinValue="0" MaxValue="360" LabelStep="0" TickStep="10" Grid.Row="1" 
+                                                                   telerikDataViz:RadRadialGauge.MinAngle="0"
+                                                                   telerikDataViz:RadRadialGauge.MaxAngle="360"
+                                                                   VerticalAlignment="Center" LabelRadiusScale="1.1">
 
+                                                <telerikDataViz:MarkerGaugeIndicator Value="270" Content="{x:Bind mydata.RSWind.TocdoGio, Mode=OneWay, Converter={StaticResource WindSpeedStringFormatConverter} }"
+                                                                             FontFamily="Segoe UI" FontSize="36" Foreground="Green" 
+                                                                             FontWeight="ExtraBold" IsRotated="False"
+                                                                             telerikDataViz:RadRadialGauge.IndicatorRadiusScale="0.4"/>
+                                                <telerikDataViz:SegmentedRadialGaugeIndicator  StartValue="0" Value="360">
+                                                    <telerikDataViz:BarIndicatorSegment Thickness="2" Stroke="Black" Length="90"/>
+                                                    <telerikDataViz:BarIndicatorSegment Thickness="2" Stroke="Green" Length="90"/>
+                                                    <telerikDataViz:BarIndicatorSegment Thickness="2" Stroke="Red" Length="90" />
+                                                    <telerikDataViz:BarIndicatorSegment Thickness="2" Stroke="Blue" Length="90" />
+                                                </telerikDataViz:SegmentedRadialGaugeIndicator>
+                                                <telerikDataViz:ArrowGaugeIndicator Value="{x:Bind mydata.RSWind.HuongGio, Mode=OneWay}" IsAnimated="True" Brush="Black" Thickness="3" telerikDataViz:RadRadialGauge.IndicatorRadiusScale="0.9" />
+                                            </telerikDataViz:RadRadialGauge>
+                                        </VariableSizedWrapGrid>
+                                    </Grid>
+                                    <Grid Grid.Column="2">
+                                        <TextBlock Text="Đông" Margin="0 0 0 10" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"  FontWeight="Bold" >
+                                            <TextBlock.RenderTransform>
+                                                <RotateTransform Angle="90" />
+                                            </TextBlock.RenderTransform>
+                                        </TextBlock>
+                                    </Grid>
+                                </Grid>
+                                <Grid Grid.Row="2">
+                                    <TextBlock Text="Nam" Margin="0 0 10 0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"  FontWeight="Bold"/>
+                                </Grid>
                             </Grid>
                             <!-- Hiển thị Nhiệt độ, độ ẩm, khói -->
                             <Grid Grid.Row="1">
@@ -148,41 +418,100 @@
                                     </Grid>
                                 </VariableSizedWrapGrid>
                             </Grid>
+                            <!--Hiển thị autonomyday-->
                             <Grid Grid.Row="2">
-
+                                <telerikDataViz:RadLinearGauge MinValue="0" MaxValue="100" LabelOffset="10" TickStep="10" LabelStep="20" Height="100">
+                                    <telerikDataViz:LinearBarGaugeIndicator Value="120" Brush="#333333" Thickness="12" telerikDataViz:RadLinearGauge.IndicatorOffset="-15"/>
+                                    <telerikDataViz:LinearBarGaugeIndicator Value="{x:Bind mydata.RSAutonomy, Mode=OneWay}" IsAnimated="True" Brush="Gray"  Thickness="18" telerikDataViz:RadLinearGauge.IndicatorOffset="-15"/>
+                                    <telerikDataViz:SegmentedLinearGaugeIndicator Value="120"  telerikDataViz:RadLinearGauge.IndicatorOffset="-2">
+                                        <telerikDataViz:BarIndicatorSegment Length="120" Stroke="#999999" Thickness="2"/>
+                                    </telerikDataViz:SegmentedLinearGaugeIndicator>
+                                    <telerikDataViz:MarkerGaugeIndicator Content="*" Foreground="Red" telerikDataViz:RadLinearGauge.IndicatorOffset="-12" FontSize="15" Value="18"/>
+                                </telerikDataViz:RadLinearGauge>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <!-- Máy 2-->
+                <!-- Điều khiển chung + kết quả Máy 2-->
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="2*" />
                         <RowDefinition Height="3*" />
                     </Grid.RowDefinitions>
+                    <!--  Cụm điều khiển chung -->
                     <Grid Grid.Row="0">
 
                     </Grid>
+                    <!-- Máy 2: Cụm hiển thị kết quả và điều khiển kết nối-->
                     <Grid Grid.Row="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
+                            <RowDefinition Height="4*" />
+                            <RowDefinition Height="1*" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
+                        <!--Máy 2: Nhãn-->
                         <Grid Grid.Row="0">
                             <TextBlock Text="BOUY 2" Margin="0 0 0 10" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"  FontWeight="ExtraBold"/>
                         </Grid>
+                        <!--Máy 2: Hiển thị sóng-->
                         <Grid Grid.Row="1">
                             <telerikChart:RadCartesianChart Margin="0 4 0 0" VerticalAlignment="Stretch">
                                 <telerikChart:RadCartesianChart.Grid>
-                                    <telerikChart:CartesianChartGrid MajorLinesVisibility="Y"/>
+                                    <telerikChart:CartesianChartGrid MajorLinesVisibility="XY"/>
                                 </telerikChart:RadCartesianChart.Grid>
                                 <telerikChart:RadCartesianChart.VerticalAxis>
-                                    <telerikChart:LinearAxis MajorStep="10" Maximum="30" Minimum="10"/>
+                                    <telerikChart:LinearAxis MajorStep="10" Maximum="80" Minimum="0">
+                                        <telerikChart:LinearAxis.LineStyle>
+                                            <Style TargetType="Line">
+                                                <Setter Property="Stroke" Value="Cyan"></Setter>
+                                            </Style>
+                                        </telerikChart:LinearAxis.LineStyle>
+                                        <telerikChart:LinearAxis.LabelStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="Cyan"></Setter>
+                                            </Style>
+                                        </telerikChart:LinearAxis.LabelStyle>
+                                        <telerikChart:LinearAxis.MajorTickStyle>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Stroke" Value="Cyan"></Setter>
+                                            </Style>
+                                        </telerikChart:LinearAxis.MajorTickStyle>
+                                    </telerikChart:LinearAxis>
                                 </telerikChart:RadCartesianChart.VerticalAxis>
                                 <telerikChart:RadCartesianChart.HorizontalAxis>
-                                    <telerikChart:DateTimeContinuousAxis x:Name="horizontalAxis" LabelFormat="{} {0,0:hh:MM:ss}" MajorStepUnit="Second" MajorStep="1" />
+                                    <telerikChart:DateTimeContinuousAxis x:Name="horizontalAxis_b2_w1" LabelFormat="{} {0,0:hh:MM:ss}" MajorStepUnit="Second" MajorStep="10" />
                                 </telerikChart:RadCartesianChart.HorizontalAxis>
-                                <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory, Mode=OneWay}">
+                                <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory, Mode=OneWay}" CombineMode="Stack" Stroke="Aqua">
+                                    <telerikChart:LineSeries.ValueBinding>
+                                        <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
+                                    </telerikChart:LineSeries.ValueBinding>
+                                    <telerikChart:LineSeries.CategoryBinding>
+                                        <telerikChart:PropertyNameDataPointBinding PropertyName="Date"/>
+                                    </telerikChart:LineSeries.CategoryBinding>
+                                </telerikChart:LineSeries>
+                                <telerikChart:LineSeries ItemsSource="{x:Bind mydata.CallHistory2, Mode=OneWay}" 
+                                                         CombineMode="Stack"
+                                                         Stroke="Red">
+                                    <telerikChart:LineSeries.VerticalAxis>
+                                        <telerikChart:LinearAxis HorizontalLocation="Right" MajorStep="20" Maximum="100" Minimum="0" >
+                                            <telerikChart:LinearAxis.LineStyle>
+                                                <Style TargetType="Line">
+                                                    <Setter Property="Stroke" Value="Red"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LineStyle>
+                                            <telerikChart:LinearAxis.LabelStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Red"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.LabelStyle>
+                                            <telerikChart:LinearAxis.MajorTickStyle>
+                                                <Style TargetType="Rectangle">
+                                                    <Setter Property="Stroke" Value="Red"></Setter>
+                                                </Style>
+                                            </telerikChart:LinearAxis.MajorTickStyle>
+                                        </telerikChart:LinearAxis>
+                                    </telerikChart:LineSeries.VerticalAxis>
                                     <telerikChart:LineSeries.ValueBinding>
                                         <telerikChart:PropertyNameDataPointBinding PropertyName="ActiveCalls"/>
                                     </telerikChart:LineSeries.ValueBinding>
@@ -192,6 +521,49 @@
                                 </telerikChart:LineSeries>
                             </telerikChart:RadCartesianChart>
 
+                        </Grid>
+                        <!--Máy 2: Các tham số hiện tại: Cs137, Cs134, I131-->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <!-- Hiển thị Cs137-->
+                            <Grid Grid.Column="0" Background="#028CFD" Margin="0,0,7,0" Width="98" >
+                                <TextBlock Text="{x:Bind mydata.CurrentActiveCalls.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Yellow"
+                                       Margin="0,15,10,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Yellow"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>Cs</Run>
+                                    <Run Typography.Variants="Superscript">137</Run>
+                                </TextBlock>
+                            </Grid>
+                            <!-- Hiển thị Cs134-->
+                            <Grid Grid.Column="1" Background="#028CFD" Margin="7,0,0,0" Width="98">
+                                <TextBlock Text="{x:Bind mydata.CurrentActiveCalls2.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="Orange"
+                                       Margin="0,15,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                                <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="Orange"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>Cs</Run>
+                                    <Run Typography.Variants="Superscript">134</Run>
+                                </TextBlock>
+                            </Grid>
+                            <!-- Hiển thị I131-->
+                            <Grid Grid.Column="2" Background="#028CFD" Margin="7,0,0,0" Width="98">
+                                <TextBlock Text="{x:Bind mydata.CurrentActiveCalls2.ActiveCalls,  Mode=OneWay}" FontSize="34" FontFamily="Segoe UI Light" Foreground="White"
+                                       Margin="0,15,10,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                                <TextBlock  FontSize="24" FontFamily="Segoe UI Light" Foreground="White"
+                                       Margin="0,60,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                                    <Run>I</Run>
+                                    <Run Typography.Variants="Superscript">131</Run>
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
+                        <!--Máy 2: Điều khiển kết nối, Tọa độ hiện tại-->
+                        <Grid Grid.Row="3">
+                            
                         </Grid>
                     </Grid>
                 </Grid>

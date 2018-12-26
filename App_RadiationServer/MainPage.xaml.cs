@@ -42,4 +42,5 @@ namespace App_RadiationServer
             this.mydata.StopTimer();
         }
     }
+    
 }
